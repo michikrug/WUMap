@@ -3,15 +3,21 @@
 
 <head>
   <title>Wizards Unite Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
     integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
     crossorigin="" />
   <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
     html,
     body,
     #map {
-      margin: 0;
       height: 100%;
+      width: 100vw;
     }
 
     img.leaflet-marker-icon {

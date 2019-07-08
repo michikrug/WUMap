@@ -120,7 +120,7 @@
       preferCanvas: true
     }).setView([50.828520, 12.921432], 15);
 
-    fetch('/poi')
+    fetch('poi')
       .then(res => res.json())
       .then(response => {
         response.forEach(poi => {
@@ -152,7 +152,7 @@
     function updatePoi(id, type) {
       if (!id || (!type && type !== 0) || [0, 1, 2, 3].indexOf(type) === -1) return;
 
-      fetch('/poi/' + id, {
+      fetch('poi/' + id, {
         method: 'PUT',
         body: JSON.stringify({ type: type }),
         headers: {

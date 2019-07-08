@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Wizards Unite Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin="" />
+  <style>
+    html,
+    body,
+    #map {
+      margin: 0;
+      height: 100%;
+    }
+
+    img.leaflet-marker-icon {
+      padding: 6px 4px;
+      border-radius: 30px;
+    }
+
+    img.leaflet-marker-icon[src="images/green.png"] {
+      background: green;
+    }
+
+    img.leaflet-marker-icon[src="images/inn.png"] {
+      background: mediumblue;
+    }
+
+    img.leaflet-marker-icon[src="images/fort.png"] {
+      background: darkred;
+    }
+
+    img.leaflet-marker-icon[src="images/gone.png"] {
+      background: black;
+    }
+
+    img.leaflet-marker-icon[src="images/unknown.png"] {
+      background: darkslategray;
+    }
+
+    .leaflet-popup-content {
+      width: 400px !important;
+      margin: 13px !important;
+    }
+
+    .leaflet-popup-content .content {
+      font-size: 13px;
+      margin-left: 110px;
+    }
+
+    .leaflet-popup-content .content svg {
+      width: 10px;
+      display: inline-block;
+    }
+
+    .leaflet-popup-content .content .type button {
+      cursor: pointer;
+      border-radius: 30px;
+    }
+
+    .leaflet-popup-content .content .type svg {
+      width: 20px;
+      height: 20px;
+      padding: 8px 3px;
+    }
+
+    .leaflet-popup-content .coords {
+      white-space: nowrap;
+    }
+
+    .leaflet-popup-content .image {
+      width: 125px;
+      height: 125px;
+      border-radius: 75px;
+      background-size: cover;
+      border: 4px solid white;
+      -webkit-filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+      filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+      display: inline-block;
+      position: absolute;
+      top: -25px;
+      left: -25px;
+    }
+
+    .leaflet-popup-content .name {
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .leaflet-popup-content .type {
+      font-size: 15px;
+    }
+
+    .leaflet-popup-content .id>span {
+      display: inline-block;
+      font-family: monospace;
+      padding: 1px;
+      background: #EEE;
+      border-radius: 3px
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+    integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+    crossorigin=""></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.8.2/js/all.js"
+    integrity="sha384-DJ25uNYET2XCl5ZF++U8eNxPWqcKohUUBUpKGlNLMchM7q4Wjg2CUpjHLaL8yYPH"
+    crossorigin="anonymous"></script>
+  <script>
+    let markers = {};
+
+    const map = L.map('map', {
+      layers: [L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png')],
+      updateWhenZooming: false,
+      updateWhenIdle: true,
+      preferCanvas: true
+    }).setView([50.828520, 12.921432], 15);
+
+    fetch('/poi')
+      .then(res => res.json())
+      .then(response => {
+        response.forEach(poi => {
+          renderPoi(poi);
+        });
+      });
+
+    function buildPopup(poi) {
+      return `
+        <div class="content">
+          <div class="image" style="background: url(${poi.image}) center center no-repeat;"></div>
+          <div class="name"><strong>${poi.name}</strong></div>
+          <div class="id"><i class="fa fa-fingerprint"></i> <span>${poi.id}</span></div>
+          <div class="coords">
+            <i class="fa fa-map-pin"></i>
+            <a href="https://maps.google.com/?q=${poi.lat},${poi.lng}">${poi.lat}, ${poi.lng}</a>
+            <a onclick=copyClipboard("${poi.lat}.toFixed(6)}|${poi.lng}.toFixed(6)}") href="#"><i class="fa fa-clipboard" aria-hidden="true"></i></a>
+          </div>
+          <br />
+          <div class="type">
+            <button onclick="updatePoi('${poi.id}', 1)"><i class="fab fa-fort-awesome"></i></button>
+            <button onclick="updatePoi('${poi.id}', 2)"><i class="fas fa-utensils"></i></button>
+            <button onclick="updatePoi('${poi.id}', 3)"><i class="fas fa-seedling"></i></button>
+            <button onclick="updatePoi('${poi.id}', 0)"><i class="fas fa-times"></i></button>
+          </div>
+        </div>`;
+    }
+
+    function updatePoi(id, type) {
+      if (!id || (!type && type !== 0) || [0, 1, 2, 3].indexOf(type) === -1) return;
+
+      fetch('/poi/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({ type: type }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(res => res.json())
+        .then(response => {
+          map.removeLayer(markers[id]);
+          delete markers[id];
+          renderPoi(response);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function renderPoi(poi) {
+      if (!poi) return;
+
+      let typeIcon;
+      switch (poi.type) {
+        case 1:
+          typeIcon = 'images/fort.png';
+          break;
+        case 2:
+          typeIcon = 'images/inn.png';
+          break;
+        case 3:
+          typeIcon = 'images/green.png';
+          break;
+        case 0:
+          typeIcon = 'images/gone.png';
+          break;
+        default:
+          typeIcon = 'images/unknown.png';
+      }
+
+      const icon = L.icon({
+        iconUrl: typeIcon,
+        iconSize: [26, 21],
+        iconAnchor: [13, 10],
+        popupAnchor: [0, -10]
+      });
+
+      markers[poi.id] = L.marker([poi.lat, poi.lng], {
+        id: poi.id,
+        virtual: true,
+        icon: icon
+      }).bindPopup(buildPopup(poi));
+
+      markers[poi.id].addTo(map);
+    }
+  </script>
+</body>
+
+</html>

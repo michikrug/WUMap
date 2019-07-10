@@ -194,6 +194,12 @@
     integrity="sha384-DJ25uNYET2XCl5ZF++U8eNxPWqcKohUUBUpKGlNLMchM7q4Wjg2CUpjHLaL8yYPH"
     crossorigin="anonymous"></script>
   <script src="leaflet-sidebar.min.js"></script>
+
+  <script src="//unpkg.com/jszip@3.1.5/dist/jszip.min.js"></script>
+  <script src="//unpkg.com/@tmcw/togeojson@3.0.1/dist/togeojsons.min.js"></script>
+  <script src="//unpkg.com/geojson-vt@3.0.0/geojson-vt.js"></script>
+  <script src="//unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
+
   <script>
     let markers = {};
     let allPoi = [];
@@ -280,6 +286,14 @@
       localStorage.setItem('option-center', [center.lat, center.lng]);
     });
 
+    const control = L.control.layers(null, null, { collapsed: false }).addTo(map);
+
+    new L.KMZParser({
+      onKMZLoaded: (layer, name) => {
+        control.addOverlay(layer, "Spuren / Traces");
+        layer.addTo(map);
+      }
+    }).load('traces.kmz');
 
     const sidebar = L.control.sidebar('sidebar').addTo(map);
 

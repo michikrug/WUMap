@@ -270,13 +270,18 @@
       });
     }
 
+    let storedCenter = (localStorage.getItem('option-center') || '').split(',');
+    if (storedCenter.length < 2) {
+      storedCenter = [50.828520, 12.921432];
+    }
+
     const map = L.map('map', {
       layers: [tileLayer],
       zoomControl: false,
       updateWhenZooming: false,
       updateWhenIdle: true,
       preferCanvas: true
-    }).setView(localStorage.getItem('option-center').split(',') || [50.828520, 12.921432], parseInt(localStorage.getItem('option-zoomlevel')) || 15);
+    }).setView(storedCenter, parseInt(localStorage.getItem('option-zoomlevel')) || 15);
 
     map.on('zoomend', () => {
       localStorage.setItem('option-zoomlevel', map.getZoom());

@@ -4,13 +4,17 @@
 <head>
   <title>Wizards Unite Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="/normalize.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
     integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
     crossorigin="" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css" />
+  <link rel="stylesheet" href="/leaflet-sidebar.min.css" />
   <style>
     body {
       padding: 0;
       margin: 0;
+      font: 14px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
     }
 
     html,
@@ -98,6 +102,10 @@
       font-size: 15px;
     }
 
+    .leaflet-popup-content .id {
+      margin-bottom: 0.25em;
+    }
+
     .leaflet-popup-content .id>span {
       display: inline-block;
       font-family: monospace;
@@ -105,33 +113,172 @@
       background: #EEE;
       border-radius: 3px
     }
+
+    .sidebar-header,
+    .sidebar-tabs>li.active,
+    .sidebar-tabs>ul>li.active {
+      background-color: darkslategray;
+    }
+
+    .sidebar-content select {
+      width: 100%;
+    }
+
+    .sidebar-content hr {
+      margin: 10pt 0;
+    }
+
+    .sidebar-content .pretty {
+      margin-bottom: 1em;
+    }
   </style>
 </head>
 
 <body>
+  <div id="sidebar" class="sidebar collapsed">
+    <!-- Nav tabs -->
+    <div class="sidebar-tabs">
+      <ul role="tablist">
+        <li><a href="#settings" role="tab"><i class="fas fa-cog"></i></a></li>
+      </ul>
+    </div>
+
+    <!-- Tab panes -->
+    <div class="sidebar-content">
+      <div class="sidebar-pane" id="settings">
+        <h1 class="sidebar-header">Einstellungen<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <h3>Sichtbarkeit</h3>
+        <div class="pretty p-switch p-fill">
+          <input type="checkbox" name="option-show-unknown" checked />
+          <div class="state">
+            <label for="option-show-unknown">Zeige unbekannte Punkte</label>
+          </div>
+        </div>
+        <div class="pretty p-switch p-fill">
+          <input type="checkbox" name="option-show-inns" checked />
+          <div class="state">
+            <label for="option-show-unknown">Zeige Gasthäuser / Inns</label>
+          </div>
+        </div>
+        <div class="pretty p-switch p-fill">
+          <input type="checkbox" name="option-show-greens" checked />
+          <div class="state">
+            <label for="option-show-unknown">Zeige Gewächshäuser / Greenhouses</label>
+          </div>
+        </div>
+        <div class="pretty p-switch p-fill">
+          <input type="checkbox" name="option-show-forts" checked />
+          <div class="state">
+            <label for="option-show-unknown">Zeige Festungen / Fortresses</label>
+          </div>
+        </div>
+        <div class="pretty p-switch p-fill">
+          <input type="checkbox" name="option-show-gone" checked />
+          <div class="state">
+            <label for="option-show-unknown">Zeige nicht vorhandene Punkte</label>
+          </div>
+        </div>
+        <hr>
+        <h3>Karten-Stil</h3>
+        <select id="option-map-tiles"></select>
+      </div>
+    </div>
+  </div>
   <div id="map"></div>
+
+
   <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
     integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
     crossorigin=""></script>
   <script defer src="https://use.fontawesome.com/releases/v5.8.2/js/all.js"
     integrity="sha384-DJ25uNYET2XCl5ZF++U8eNxPWqcKohUUBUpKGlNLMchM7q4Wjg2CUpjHLaL8yYPH"
     crossorigin="anonymous"></script>
+  <script src="/leaflet-sidebar.min.js"></script>
   <script>
     let markers = {};
+    let allPoi = [];
+
+    const mapTiles = [
+      {
+        name: "CartoDB Darkmatter",
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png"
+      },
+      {
+        name: "CartoDB Darkmatter nolabel",
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/dark_nolabels/{z}/{x}/{y}.png"
+      },
+      {
+        name: "CartoDB Positron",
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png"
+      },
+      {
+        name: "CartoDB Positron nolabel",
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png"
+      },
+      {
+        name: "CartoDB Voyager",
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+      },
+      {
+        name: "OpenStreetMap",
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      },
+      {
+        name: "OpenStreetMap HOT",
+        url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+      },
+      {
+        name: "Wikimedia",
+        url: "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}{r}.png"
+      },
+      {
+        name: "Hydda",
+        url: "https://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png"
+      }
+    ];
+
+    const currentTileLayer = localStorage.getItem('tileLayer') || mapTiles[0].url;
+    const tileLayer = L.tileLayer(currentTileLayer);
+
+    const selectMapTiles = document.getElementById('option-map-tiles');
+    mapTiles.forEach(t => {
+      const option = document.createElement('option');
+      option.value = t.url;
+      option.innerHTML = t.name;
+      option.selected = t.url == currentTileLayer;
+      selectMapTiles.append(option);
+    });
+    selectMapTiles.addEventListener('change', function (e) {
+      localStorage.setItem(this.id, this.value);
+      tileLayer.setUrl(this.value);
+    });
+
+    let rerender = false;
+    const options = document.querySelectorAll('#settings input[type="checkbox"]');
+    for (const option of options) {
+      option.checked = localStorage.getItem(option.name) != 'false';
+      option.addEventListener('change', function (e) {
+        localStorage.setItem(this.name, this.checked);
+        if (!rerender) setTimeout(renderAllPoi, 2000);
+        rerender = true;
+      });
+    }
 
     const map = L.map('map', {
-      layers: [L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png')],
+      layers: [tileLayer],
+      zoomControl: false,
       updateWhenZooming: false,
       updateWhenIdle: true,
       preferCanvas: true
     }).setView([50.828520, 12.921432], 15);
 
+    const sidebar = L.control.sidebar('sidebar').addTo(map);
+
     fetch('poi')
       .then(res => res.json())
       .then(response => {
-        response.forEach(poi => {
-          renderPoi(poi);
-        });
+        allPoi = response;
+        renderAllPoi();
       });
 
     function buildPopup(poi) {
@@ -161,9 +308,7 @@
       fetch('poi/' + id, {
         method: 'PUT',
         body: JSON.stringify({ type: type }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       })
         .then(res => res.json())
         .then(response => {
@@ -180,18 +325,23 @@
       let typeIcon;
       switch (poi.type) {
         case 1:
+          if (localStorage.getItem('option-show-forts') == 'false') return;
           typeIcon = 'images/fort.png';
           break;
         case 2:
+          if (localStorage.getItem('option-show-inns') == 'false') return;
           typeIcon = 'images/inn.png';
           break;
         case 3:
+          if (localStorage.getItem('option-show-greens') == 'false') return;
           typeIcon = 'images/green.png';
           break;
         case 0:
+          if (localStorage.getItem('option-show-gone') == 'false') return;
           typeIcon = 'images/gone.png';
           break;
         default:
+          if (localStorage.getItem('option-show-unknown') == 'false') return;
           typeIcon = 'images/unknown.png';
       }
 
@@ -209,6 +359,17 @@
       }).bindPopup(buildPopup(poi));
 
       markers[poi.id].addTo(map);
+    }
+
+    function renderAllPoi() {
+      Object.keys(markers).forEach(id => {
+        map.removeLayer(markers[id]);
+        delete markers[id];
+      });
+      allPoi.forEach(poi => {
+        renderPoi(poi);
+      });
+      rerender = false;
     }
   </script>
 </body>

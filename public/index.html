@@ -5,10 +5,10 @@
   <title>Wizards Unite Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="normalize.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+  <link rel="stylesheet" href="//unpkg.com/leaflet@1.5.1/dist/leaflet.css"
     integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
     crossorigin="" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css" />
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css" />
   <link rel="stylesheet" href="leaflet-sidebar.min.css" />
   <style>
     body {
@@ -187,10 +187,10 @@
   <div id="map"></div>
 
 
-  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+  <script src="//unpkg.com/leaflet@1.5.1/dist/leaflet.js"
     integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
     crossorigin=""></script>
-  <script defer src="https://use.fontawesome.com/releases/v5.8.2/js/all.js"
+  <script defer src="//use.fontawesome.com/releases/v5.8.2/js/all.js"
     integrity="sha384-DJ25uNYET2XCl5ZF++U8eNxPWqcKohUUBUpKGlNLMchM7q4Wjg2CUpjHLaL8yYPH"
     crossorigin="anonymous"></script>
   <script src="leaflet-sidebar.min.js"></script>
@@ -270,16 +270,31 @@
       updateWhenZooming: false,
       updateWhenIdle: true,
       preferCanvas: true
-    }).setView([50.828520, 12.921432], 15);
+    }).setView(localStorage.getItem('option-center').split(',') || [50.828520, 12.921432], parseInt(localStorage.getItem('option-zoomlevel')) || 15);
+
+    map.on('zoomend', () => {
+      localStorage.setItem('option-zoomlevel', map.getZoom());
+    });
+    map.on('moveend', () => {
+      var center = map.getCenter();
+      localStorage.setItem('option-center', [center.lat, center.lng]);
+    });
+
 
     const sidebar = L.control.sidebar('sidebar').addTo(map);
 
-    fetch('poi')
-      .then(res => res.json())
-      .then(response => {
-        allPoi = response;
-        renderAllPoi();
-      });
+    getAllPoi();
+
+    setInterval(getAllPoi, 600000);
+
+    function getAllPoi() {
+      fetch('poi')
+        .then(res => res.json())
+        .then(response => {
+          allPoi = response;
+          renderAllPoi();
+        });
+    }
 
     function buildPopup(poi) {
       return `

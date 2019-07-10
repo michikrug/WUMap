@@ -131,6 +131,64 @@
     .sidebar-content .pretty {
       margin-bottom: 1em;
     }
+
+    .sidebar-content .legend {
+      width: 1em;
+      height: 2.5em;
+      border: 2px solid;
+      display: block;
+      float: left;
+      margin-right: .5em;
+    }
+
+    .sidebar-content #legend>div {
+      margin-bottom: .5em;
+    }
+
+    .sidebar-content .legend.care {
+      border-color: #3B86CB;
+      background-color: #C4DCEF;
+    }
+
+    .sidebar-content .legend.wonders {
+      border-color: #4295A5;
+      background-color: #C5DEE3;
+    }
+
+    .sidebar-content .legend.legends {
+      border-color: #424242;
+      background-color: #C7C7C7;
+    }
+
+    .sidebar-content .legend.artifacts {
+      border-color: #B22E5B;
+      background-color: #E8C1CE;
+    }
+
+    .sidebar-content .legend.games {
+      border-color: #F8D849;
+      background-color: #FDF4C9;
+    }
+
+    .sidebar-content .legend.magizoo {
+      border-color: #245596;
+      background-color: #BDCDE0;
+    }
+
+    .sidebar-content .legend.dark {
+      border-color: #479B5F;
+      background-color: #C8E1CF;
+    }
+
+    .sidebar-content .legend.hogwarts {
+      border-color: #983220;
+      background-color: #E0C2BD;
+    }
+
+    .sidebar-content .legend.ministry {
+      border-color: #80772C;
+      background-color: rgb(204, 202, 180);
+    }
   </style>
 </head>
 
@@ -140,6 +198,7 @@
     <div class="sidebar-tabs">
       <ul role="tablist">
         <li><a href="#settings" role="tab"><i class="fas fa-cog"></i></a></li>
+        <li><a href="#legend" role="tab"><i class="fas fa-layer-group"></i></a></li>
       </ul>
     </div>
 
@@ -181,6 +240,19 @@
         <hr>
         <h3>Karten-Stil</h3>
         <select id="option-map-tiles"></select>
+      </div>
+      <div class="sidebar-pane" id="legend">
+        <h1 class="sidebar-header">Legende<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <h3>Spuren / Traces</h3>
+        <div><span class="legend care"></span> Pflege Magischer Geschöpfe<br />Care of Magical Creatures</div>
+        <div><span class="legend wonders"></span> Die Wunder der Welt der Zauberei<br />Wonders of the Wizarding World</div>
+        <div><span class="legend legends"></span> Legenden von Hogwards<br />Legends of Hogwards</div>
+        <div><span class="legend artifacts"></span> Geheimnisvolle Artefakte<br />Mysterious Artifacts</div>
+        <div><span class="legend games"></span> Magische Spiele und Sportarten<br />Magical Games and Sports</div>
+        <div><span class="legend magizoo"></span> Magizoologie<br />Magizoology</div>
+        <div><span class="legend dark"></span> Dunkle Künste<br />Dark Arts</div>
+        <div><span class="legend hogwarts"></span> Die Hogwarts-Schule<br />Hogwarts School (9 3/4)</div>
+        <div><span class="legend ministry"></span> Zaubereiministerium<br />Ministry of Magic</div>
       </div>
     </div>
   </div>

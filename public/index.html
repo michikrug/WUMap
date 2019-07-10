@@ -237,7 +237,7 @@
       }
     ];
 
-    const currentTileLayer = localStorage.getItem('tileLayer') || mapTiles[0].url;
+    const currentTileLayer = localStorage.getItem('option-map-tiles') || mapTiles[0].url;
     const tileLayer = L.tileLayer(currentTileLayer);
 
     const selectMapTiles = document.getElementById('option-map-tiles');

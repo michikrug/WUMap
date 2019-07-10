@@ -296,6 +296,8 @@
     new L.KMZParser({
       onKMZLoaded: (layer, name) => {
         control.addOverlay(layer, "Spuren / Traces");
+        const l = layer._layers[Object.keys(layer._layers)[0]]._layers;
+        Object.keys(l).forEach(id => l[id]._popup = undefined);
         layer.addTo(map);
       }
     }).load('traces.kmz');

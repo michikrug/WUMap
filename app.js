@@ -13,7 +13,7 @@ let data = [];
 jsonfile.readFile(dataFilePath, function (err, obj) {
   if (err) console.error(err)
   data = obj;
-})
+});
 
 app.use(bodyParser.json());
 
@@ -38,7 +38,7 @@ app.put('/poi/:id', (req, res) => {
   if (!p) {
     return res.sendStatus(404);
   }
-  if ((!req.body.type && req.body.type !== 0) || [0,1,2,3].indexOf(req.body.type) === -1) {
+  if ((!req.body.type && req.body.type !== 0) || [0, 1, 2, 3, 4].indexOf(req.body.type) === -1) {
     return res.sendStatus(400);
   }
 

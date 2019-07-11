@@ -405,13 +405,14 @@
             <button onclick="updatePoi('${poi.id}', 1)"><i class="fab fa-fort-awesome"></i></button>
             <button onclick="updatePoi('${poi.id}', 2)"><i class="fas fa-utensils"></i></button>
             <button onclick="updatePoi('${poi.id}', 3)"><i class="fas fa-seedling"></i></button>
-            <button onclick="updatePoi('${poi.id}', 0)"><i class="fas fa-times"></i></button>
+            <button onclick="updatePoi('${poi.id}', 4)"><i class="fas fa-times"></i></button>
+            <button onclick="updatePoi('${poi.id}', 0)"><i class="fas fa-question"></i></button>
           </div>
         </div>`;
     }
 
     function updatePoi(id, type) {
-      if (!id || (!type && type !== 0) || [0, 1, 2, 3].indexOf(type) === -1) return;
+      if (!id || (!type && type !== 0) || [0, 1, 2, 3, 4].indexOf(type) === -1) return;
 
       fetch('poi/' + id, {
         method: 'PUT',
@@ -444,7 +445,7 @@
           if (localStorage.getItem('option-show-greens') == 'false') return;
           typeIcon = 'images/green.png';
           break;
-        case 0:
+        case 4:
           if (localStorage.getItem('option-show-gone') == 'false') return;
           typeIcon = 'images/gone.png';
           break;

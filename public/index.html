@@ -421,6 +421,8 @@
       })
         .then(res => res.json())
         .then(response => {
+          const poi = allPoi.find(p => p.id == id);
+          if (poi) poi.type = type;
           map.removeLayer(markers[id]);
           delete markers[id];
           renderPoi(response);
